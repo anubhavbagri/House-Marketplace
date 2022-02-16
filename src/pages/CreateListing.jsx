@@ -5,6 +5,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from 'firebase/storage';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase.config';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -153,7 +154,7 @@ function CreateListing() {
     };
 
     //imgUrls will be an array of downloadURLs
-    const imgUrls = await Promise.all(
+    const imageUrls = await Promise.all(
       [...images].map((image) => storeImage(image))
     ).catch(() => {
       setLoading(false);
@@ -161,9 +162,23 @@ function CreateListing() {
       return;
     });
 
-    console.log(imgUrls);
+    const formDataCopy = {
+      ...formData,
+      imageUrls,
+      geolocation,
+      timestamp: serverTimestamp(),
+    };
 
+    delete formDataCopy.images;
+    delete formDataCopy.address;
+    location && (formDataCopy.location = location);
+    !formDataCopy.offer && delete formDataCopy.discountedPrice;
+
+    const docRef = await addDoc(collection(db, 'listings'), formDataCopy);
     setLoading(false);
+
+    toast.success('Listing saved');
+    navigate(`/category/${formDataCopy.type}/${docRef.id}`);
   };
 
   const onMutate = (e) => {
@@ -382,21 +397,21 @@ function CreateListing() {
             </button>
           </div>
 
-          <label className="formLabel">
-            <div className="formPriceDiv">
-              <input
-                className="formInputSmall"
-                type="number"
-                id="regularPrice"
-                value={regularPrice}
-                onChange={onMutate}
-                min="50"
-                max="750000000"
-                required
-              />
-              {type === 'rent' && <p className="formPriceText">$ / Month</p>}
-            </div>
-          </label>
+          <label className="formLabel">Regular Price</label>
+          <div className="formPriceDiv">
+            <input
+              className="formInputSmall"
+              type="number"
+              id="regularPrice"
+              value={regularPrice}
+              onChange={onMutate}
+              min="50"
+              max="750000000"
+              required
+            />
+            {type === 'rent' && <p className="formPriceText">$ / Month</p>}
+          </div>
+
           {offer && (
             <>
               <label className="formLabel">Discounted Price</label>
