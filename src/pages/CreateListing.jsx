@@ -2,6 +2,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../components/Spinner';
+import { toast } from 'react-toastify';
 
 function CreateListing() {
   const [geolocationEnabled, setGeoLocationEnabled] = useState(true);
@@ -59,9 +60,54 @@ function CreateListing() {
     };
   }, [isMounted]);
 
-  const onSubmit = (e) => {
+  // geocoding(taking address & convert to latitude & longitude), img upload & submit to firebase
+  const onSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
+    setLoading(true);
+
+    if (discountedPrice >= regularPrice) {
+      setLoading(false);
+      toast.error('Discounted price needs to be less than the regular price');
+      return;
+    }
+
+    if (images.length > 6) {
+      setLoading(false);
+      toast.error('Max 6 images');
+      return;
+    }
+
+    // object that holds the latitude and longitude that ultimately gets submitted to firebase
+    let geolocation = {};
+    let location;
+
+    if (geolocationEnabled) {
+      const response = await fetch(
+        `http://www.mapquestapi.com/geocoding/v1/address?key=${process.env.REACT_APP_MAPQUEST_API_KEY}&location=${address}`
+      );
+      const data = await response.json();
+
+      geolocation.lat = data.results[0]?.locations[0].latLng.lat ?? 0;
+      geolocation.lng = data.results[0]?.locations[0].latLng.lng ?? 0;
+
+      location =
+        (data.results[0]?.locations[0].street).length === 0
+          ? undefined
+          : data.results[0]?.providedLocation.location;
+
+      if (location === undefined || location.includes('undefined')) {
+        setLoading(false);
+        toast.error('Please enter a correct address');
+        return;
+      }
+    } else {
+      geolocation.lat = latitude;
+      geolocation.lng = longitude;
+      location = address;
+    }
+
+    setLoading(false);
   };
 
   const onMutate = (e) => {
