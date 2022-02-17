@@ -620,10 +620,10 @@ button {
 }
 
 .messageDiv {
-  margin-top: 2rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  margin-bottom: 4rem;
+  margin-bottom: 2rem;
 }
 
 .messageLabel {
