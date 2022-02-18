@@ -50,17 +50,19 @@ function Listing() {
       >
         {listing.imageUrls.map((url, index) => (
           <SwiperSlide key={index}>
-            <img
-              src={listing.imageUrls[index]}
-              style={{
-                backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                position: 'relative',
-                height: '100%',
-                width: '100%',
-              }}
-            />
+            <div className="swiper-container">
+              <img
+                src={listing.imageUrls[index]}
+                style={{
+                  objectFit: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
+                  position: 'relative',
+                  height: '100%',
+                  width: '100%',
+                }}
+              />
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>
