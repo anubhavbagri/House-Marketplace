@@ -123,7 +123,7 @@ function EditListing() {
 
     if (geolocationEnabled) {
       const response = await fetch(
-        `http://www.mapquestapi.com/geocoding/v1/address?key=${process.env.REACT_APP_MAPQUEST_API_KEY}&location=${address}`
+        `https://www.mapquestapi.com/geocoding/v1/address?key=${process.env.REACT_APP_MAPQUEST_API_KEY}&location=${address}`
       );
       const data = await response.json();
 
